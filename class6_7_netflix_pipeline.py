@@ -6,8 +6,10 @@ from pathlib import Path
 import pandas as pd
 
 from class6_7_netflix_utils import (
+    clean_text,
     drop_missing_rows,
     remove_duplicates,
+    remove_iqr_outliers,
     show_overview,
 )
 
@@ -51,6 +53,8 @@ def main():
 
     logger.info(f"Loaded {len(df)} rows and {len(df.columns)} columns")
 
+    df_original = df.copy()
+
 
     # TODO 5:
     # Call show_overview().
@@ -75,6 +79,42 @@ def main():
 
     logger.info(f"Dropped {removed} rows with missing values")
 
+    # TODO 3:
+    # Inside a try block, remove runtime_minutes outliers
+    # using remove_iqr_outliers() with a threshold of 1.5.
+    # Catch ValueError and exit with sys.exit(1).# Log an INFO message.
+
+    try:
+        df = remove_iqr_outliers(df, "runtime_minutes", 1.5)
+    except ValueError:
+        sys.exit(1)
+
+    logger.info("Removed runtime_minutes outlier(s)")
+
+    # TODO 4:
+    # Apply clean_text() to title, type, and country.
+    # Log an INFO message.
+
+    for column in ["title", "type", "country"]:
+        df[column] = df[column].apply(clean_text)
+        logger.info(f"Cleaned text column: {column}")
+
+    # TODO 5:
+    # Create a report (dictionary) containing rows_before, rows_after, rows_removed, and columns.
+    # Log an INFO message reporting: rows_before, rows_after, rows_removed, and columns.
+
+    rows_before = len(df_original)
+    rows_after = len(df)
+    rows_removed = rows_before - rows_after
+
+    report = {
+        "rows_before": rows_before,
+        "rows_after": rows_after,
+        "rows_removed": rows_removed,
+        "columns": len(df.columns),
+    }
+
+    logger.info(f"Cleaning complete: {report}")
 
 if __name__ == "__main__":
     main()
