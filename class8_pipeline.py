@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
-from class8_data_loader import load_netflix
-from class8_data_validator import require_columns
+from class8_src import load_netflix, require_columns
 
 logging.basicConfig(
     level=logging.INFO,
