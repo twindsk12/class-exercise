@@ -2,16 +2,20 @@
 import io
 import logging
 from pathlib import Path
+from src import ProcessConfig
 
 import pandas as pd
 from fastapi import FastAPI, Query, File, HTTPException, UploadFile
 from src import MovieInput
 from src import MovieResponse
 from src import MovieInput, MovieResponse, CSVInfo, DataStorage
+from middleware import log_requests
 
 
 
 app = FastAPI(title="Movie API")
+
+app.middleware("http")(log_requests)
 
 @app.get("/health")
 def health_check():
@@ -158,3 +162,20 @@ def get_dataset_shape(dataset_id: int):
         "rows": df.shape[0],
         "columns": df.shape[1]
     }
+
+
+@app.post("/demo/process-config")
+def demo_process_config(config: ProcessConfig):
+    df = pd.DataFrame({
+        "title": ["Movie A", "Movie A", "Movie B", None]
+    })
+
+    settings = config.model_dump()
+
+    if settings["processing"]["remove_duplicates"]:
+        df = df.drop_duplicates()
+
+    if settings["processing"]["drop_missing"]:
+        df = df.dropna()
+
+    return {"rows": len(df)}
